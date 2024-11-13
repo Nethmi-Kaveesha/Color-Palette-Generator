@@ -138,7 +138,78 @@ function generateSquarePalette(hs1,count){
     }
     return palette;
 }
+
+function generateRelatedColorPalette(hs1,count){
+    const palette = [];
+    const [hue,saturation, lightness] = hs1;
+
+    //to get ralted colors we'll play with hue, saturation and lightness
+    //increase saturation by 20 and if greate than 100 reduce
+    palette.push([hue,(saturation + 20) % 100, lightness]);
+    //decrease by 20
+    palette.push([hue,(saturation - 20) % 100, lightness]);
+    //increase lightness by 20
+    palette.push([hue,saturation, (lightness + 20) % 100]);
+    //decrease lilightness
+    palette.push([hue,saturation, (lightness - 20) % 100]);
+    //same with hue
+    palette.push([(hue + 20) % 360,saturation, lightness]);
+    palette.push([(hue - 20) % 360,saturation, lightness]);
+
+    //shuffle array
+    for (let i = palette.length -1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [palette[i], palette[j]] = palette[j], palette[i];
+    }
+    return palette;
+}
+
+//function a to call a specific function above based on type
+function generatePalette(hs1,type,count) {
+    switch (type) {
+        case "analogous":
+            return generateAnalogousPalette(hs1,count);
+            case "monochromatic":
+                return generateMonochromaticPalette(hs1,count);
+        case "triadic":
+            return generateTriadicPalette(hs1,count);
+        case "compound":
+            return generateCompoundPalette(hs1,count);
+        case "shades":
+            return generateShadesPalette(hs1,count);
+            case "tetradic":
+                return generateTetradicPalette(hs1,count);
+        case "square":
+            return generateSquarePalette(hs1,count);
+        case "related":
+            return generateRelatedColorPalette(hs1,count);
+    }
+
+}
+
+function generatePaletteHtml(type,container) {
+    //container means for which container palette or related
+    let color = currentColor;
+    let count = currentCount;
+    //we can give any type of color like name of color,rgb, hex to gel hs1
+    const hs1 = getHs1FromColor(color)
+}
+
+function getHs1FromColor(color) {
+    //to get hs1 from any type of given color
+    let hs1;
+    if (isValodColor(color)){
+        //id valid color name,hex,rgb given
+
+    }
+}
+
+function isValodColor(color){
+    //check color validity
+    //a function to check if a given value is valid css
+    return CSS.supports("color", color);
+}
 let hs1 = [155, 55, 55];
 
-let palette = generateMonochromaticPalette(hs1,6);
+let palette = generateMonochromaticPalette(hs1,"related",6);
 console.log(palette);
