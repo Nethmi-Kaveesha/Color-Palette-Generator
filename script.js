@@ -1,215 +1,227 @@
 const searchInput = document.querySelector("#search-input"),
-      searchColor = document.querySelector("#search-color"),
-      searchImage = document.querySelector("#search-image"),
-      typeSelect = document.querySelector("#palette-type"),
-      countSelect = document.querySelector("#palette-count"),
-      randomBtn = document.querySelector("#random-btn"),
-      paletteContainer = document.querySelector("#palette"),
-      relatedContainer = document.querySelector("#related");
+    searchColor = document.querySelector("#search-color"),
+    searchImage = document.querySelector("#search-image"),
+    typeSelect = document.querySelector("#palette-type"),
+    countSelect = document.querySelector("#palette-count"),
+    randomBtn = document.querySelector("#random-btn"),
+    paletteContainer = document.querySelector("#palette"),
+    relatedContainer = document.querySelector("#related");
 
-let currentColor = "skyblue",
-    currentType = "analogous"
-    currentCount = 6,
+let currentColor = "skyblue", // Default color
+    currentType = "analogous", // Default palette type
+    currentCount = 6, // Default count of colors
     imageColors = [];
 
-//  ALL FUNCTION TO GENERATE DIFFERENT PALETTES
+// Functions to generate color palettes
 
-function generateAnalogousPalette(hs1,count){
-    //hs1 is color,count means quantity of colors
+function generateAnalogousPalette(hsl, count) {
     const palette = [];
-    //get hue, saturation, lightness from hs1,this is the reason to use hs1
-    const [hue,saturation, lightness] = hs1;
-
-    //generate colors equals count
-    for (let i = 0; i < count; i++) {
-        //add 30 and mulptiple to index for every color
-        let neHue = hue + 30 * i;
-        //new hue can be gear than 360 so chxek if greater than hue-360
-        if (neHue < 360) {
-            neHue -= 360;
-        }
-
-        //add new color in palette array
-        palette.push([neHue,saturation,lightness]);
-    }
-
-    //after getting all colors return palette
-    return palette;
-}
-
-// //lets test it
-//
-// let hs1 =[155, 60, 60];
-// let palette = generateAnalogousPalette(hs1,6);
-// console.log(palette);
-
-function generateMonochromaticPalette(hs1,count){
-    //same in this but instead of hue increase lightness by 10
-    const palette = [];
-    let [hue,saturation, lightness] = hs1;
+    const [hue, saturation, lightness] = hsl;
 
     for (let i = 0; i < count; i++) {
-        let newLightness = (lightness = 10 * i);
-        if (newLightness >100) {
-            //lightness cannot be greater than 100
-            newLightness -= 100;
-        }
-        palette.push([hue,saturation,newLightness]);
+        let newHue = (hue + (i - Math.floor(count / 2)) * 30 + 360) % 360;
+        palette.push([newHue, saturation, lightness]);
     }
+
     return palette;
 }
 
-
-function generateTriadicPalette(hs1,count){
+function generateMonochromaticPalette(hsl, count) {
     const palette = [];
-    let [hue,saturation, lightness] = hs1;
+    let [hue, saturation, lightness] = hsl;
 
     for (let i = 0; i < count; i++) {
-        let newHue = hue + 120 * i;
-        if (newHue > 360) {
-            newHue -= 360;
-        }
-
-        palette.push([newHue,saturation,lightness]);
+        let newLightness = (lightness + 10 * i) % 100;
+        palette.push([hue, saturation, newLightness]);
     }
     return palette;
 }
 
-function generateCompoundPalette(hs1,count){
+function generateTriadicPalette(hsl, count) {
     const palette = [];
-    let [hue,saturation, lightness] = hs1;
-
-    //in compound increase hue by 150
-    for (let i = 0; i < count; i++) {
-        let newHue = hue + 150 * i;
-        if (newHue > 360) {
-            newHue -= 360;
-        }
-        palette.push([newHue,saturation,lightness]);
-    }
-    return palette;
-}
-
-function generateShadesPalette(hs1,count){
-    const palette = [];
-    let [hue,saturation, lightness] = hs1;
-
-    //to get shades increase saturation by 10
+    let [hue, saturation, lightness] = hsl;
 
     for (let i = 0; i < count; i++) {
-        let newSaturation = saturation + 10 * i;
-        if (newSaturation > 100) {
-            //saturation cant be generator than 100
-            newSaturation -= 100;
-        }
-
-        palette.push([hue,saturation,lightness]);
+        let newHue = (hue + 120 * i) % 360;
+        palette.push([newHue, saturation, lightness]);
     }
-
     return palette;
 }
 
-function generateTetradicPalette(hs1,count){
+function generateCompoundPalette(hsl, count) {
     const palette = [];
-    let [hue,saturation, lightness] = hs1;
+    let [hue, saturation, lightness] = hsl;
 
-    //in compound increase hue by 90
     for (let i = 0; i < count; i++) {
-        let newHue = hue + 90 * i;
-        if (newHue > 360) {
-            newHue -= 360;
-        }
-        palette.push([newHue,saturation,lightness]);
+        let newHue = (hue + 150 * i) % 360;
+        palette.push([newHue, saturation, lightness]);
     }
     return palette;
 }
 
-function generateSquarePalette(hs1,count){
+function generateShadesPalette(hsl, count) {
     const palette = [];
-    let [hue,saturation, lightness] = hs1;
+    let [hue, saturation, lightness] = hsl;
 
-    //in compound increase hue by 60
     for (let i = 0; i < count; i++) {
-        let newHue = hue + 60 * i;
-        if (newHue > 360) {
-            newHue -= 360;
-        }
-        palette.push([newHue,saturation,lightness]);
+        let newSaturation = (saturation + 10 * i) % 100;
+        palette.push([hue, newSaturation, lightness]);
     }
     return palette;
 }
 
-function generateRelatedColorPalette(hs1,count){
+function generateTetradicPalette(hsl, count) {
     const palette = [];
-    const [hue,saturation, lightness] = hs1;
+    let [hue, saturation, lightness] = hsl;
 
-    //to get ralted colors we'll play with hue, saturation and lightness
-    //increase saturation by 20 and if greate than 100 reduce
-    palette.push([hue,(saturation + 20) % 100, lightness]);
-    //decrease by 20
-    palette.push([hue,(saturation - 20) % 100, lightness]);
-    //increase lightness by 20
-    palette.push([hue,saturation, (lightness + 20) % 100]);
-    //decrease lilightness
-    palette.push([hue,saturation, (lightness - 20) % 100]);
-    //same with hue
-    palette.push([(hue + 20) % 360,saturation, lightness]);
-    palette.push([(hue - 20) % 360,saturation, lightness]);
-
-    //shuffle array
-    for (let i = palette.length -1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [palette[i], palette[j]] = palette[j], palette[i];
+    for (let i = 0; i < count; i++) {
+        let newHue = (hue + 90 * i) % 360;
+        palette.push([newHue, saturation, lightness]);
     }
     return palette;
 }
 
-//function a to call a specific function above based on type
-function generatePalette(hs1,type,count) {
+function generateSquarePalette(hsl, count) {
+    const palette = [];
+    let [hue, saturation, lightness] = hsl;
+
+    for (let i = 0; i < count; i++) {
+        let newHue = (hue + 60 * i) % 360;
+        palette.push([newHue, saturation, lightness]);
+    }
+    return palette;
+}
+
+function generateRelatedColorPalette(hsl, count) {
+    const palette = [];
+    const [hue, saturation, lightness] = hsl;
+
+    palette.push([hue, (saturation + 20) % 100, lightness]);
+    palette.push([hue, (saturation - 20 + 100) % 100, lightness]);
+    palette.push([hue, saturation, (lightness + 20) % 100]);
+    palette.push([hue, saturation, (lightness - 20 + 100) % 100]);
+    palette.push([(hue + 20) % 360, saturation, lightness]);
+    palette.push([(hue - 20 + 360) % 360, saturation, lightness]);
+
+    return palette;
+}
+
+// Function to generate palette based on type
+function generatePalette(hsl, type, count) {
     switch (type) {
         case "analogous":
-            return generateAnalogousPalette(hs1,count);
-            case "monochromatic":
-                return generateMonochromaticPalette(hs1,count);
+            return generateAnalogousPalette(hsl, count);
+        case "monochromatic":
+            return generateMonochromaticPalette(hsl, count);
         case "triadic":
-            return generateTriadicPalette(hs1,count);
+            return generateTriadicPalette(hsl, count);
         case "compound":
-            return generateCompoundPalette(hs1,count);
+            return generateCompoundPalette(hsl, count);
         case "shades":
-            return generateShadesPalette(hs1,count);
-            case "tetradic":
-                return generateTetradicPalette(hs1,count);
+            return generateShadesPalette(hsl, count);
+        case "tetradic":
+            return generateTetradicPalette(hsl, count);
         case "square":
-            return generateSquarePalette(hs1,count);
+            return generateSquarePalette(hsl, count);
         case "related":
-            return generateRelatedColorPalette(hs1,count);
-    }
-
-}
-
-function generatePaletteHtml(type,container) {
-    //container means for which container palette or related
-    let color = currentColor;
-    let count = currentCount;
-    //we can give any type of color like name of color,rgb, hex to gel hs1
-    const hs1 = getHs1FromColor(color)
-}
-
-function getHs1FromColor(color) {
-    //to get hs1 from any type of given color
-    let hs1;
-    if (isValodColor(color)){
-        //id valid color name,hex,rgb given
-
+            return generateRelatedColorPalette(hsl, count);
+        default:
+            return [];
     }
 }
 
-function isValodColor(color){
-    //check color validity
-    //a function to check if a given value is valid css
+// Function to generate HTML for the palette
+function generatePaletteHtml(type, container) {
+    const color = currentColor;
+    const count = currentCount;
+    const hsl = getHslFromColor(color);
+
+    if (!hsl) return;
+
+    const palette = generatePalette(hsl, type, count);
+    container.innerHTML = "";
+
+    palette.forEach((colorHsl) => {
+        const colorHex = hslToHex(colorHsl);
+        const colorEl = document.createElement("div");
+        colorEl.classList.add("color");
+        colorEl.style.backgroundColor = colorHex;
+
+        colorEl.innerHTML = `
+            <div class="overlay">
+                <div class="icons">
+                    <div class="copy-color">
+                        <i class="fas fa-copy"></i>
+                    </div>
+                    <div class="generate-palette">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                </div>
+                <div class="code">${color}</div>
+            </div>
+        `;
+        container.appendChild(colorEl);
+    });
+}
+
+function getHslFromColor(color) {
+    if (!isValidColor(color)) return null;
+    const temp = document.createElement("div");
+    temp.style.color = color;
+    document.body.appendChild(temp);
+    const styles = window.getComputedStyle(temp);
+    const rgb = removeRGB(styles.getPropertyValue("color"));
+    document.body.removeChild(temp);
+    return rgbToHsl(rgb);
+}
+
+function isValidColor(color) {
     return CSS.supports("color", color);
 }
-let hs1 = [155, 55, 55];
 
-let palette = generateMonochromaticPalette(hs1,"related",6);
-console.log(palette);
+function removeRGB(rgb) {
+    return rgb.replace("rgb(", "").replace(")", "").split(",").map(Number);
+}
+
+function rgbToHsl([r, g, b]) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        h = (max === r) ? ((g - b) / d + (g < b ? 6 : 0)) :
+            (max === g) ? (b - r) / d + 2 : (r - g) / d + 4;
+        h *= 60;
+    }
+    return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+}
+
+function hslToHex([h, s, l]) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, "0");
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+// Generate initial palettes
+generatePaletteHtml(currentType, paletteContainer);
+generatePaletteHtml("related", relatedContainer);
+
+// generate palette when a color is written in input
+searchInput.addEventListener("keyup", (e) => {
+    const value = e.target.value;
+    //console.log("Input value:", value);  // Add this line for debugging
+    if (isValidColor(value)){
+        // If a valid color is written
+        searchColor.style.backgroundColor = value;
+        currentColor = value;
+        generatePaletteHtml(currentType, paletteContainer);
+        generatePaletteHtml("related", relatedContainer);
+    }
+});
